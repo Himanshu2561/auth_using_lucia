@@ -9,7 +9,11 @@ type Props = {
 };
 
 const SignOutButton = ({ children }: Props) => {
-  return <Button onClick={() => logOut()}>{children}</Button>;
+  return (
+    <Button onClick={() => logOut()} className="mx-auto">
+      {children}
+    </Button>
+  );
 };
 
 export default SignOutButton;

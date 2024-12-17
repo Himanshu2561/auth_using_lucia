@@ -1,7 +1,7 @@
-import { Lucia } from "lucia";
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
-import { prisma } from "./prisma";
+import { Lucia } from "lucia";
 import { cookies } from "next/headers";
+import { prisma } from "./prisma";
 
 const adapter = new PrismaAdapter(prisma.session, prisma.user);
 
@@ -44,7 +44,9 @@ export const getUser = async () => {
         );
       }
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 
   const dbUser = await prisma.user.findUnique({
     where: {
@@ -53,6 +55,7 @@ export const getUser = async () => {
     select: {
       name: true,
       email: true,
+      picture: true,
     },
   });
 

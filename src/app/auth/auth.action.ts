@@ -8,6 +8,8 @@ import { lucia } from "@/lib/lucia";
 import { cookies } from "next/headers";
 import { signInSchema } from "./SignInForm";
 import { redirect } from "next/navigation";
+import { generateCodeVerifier, generateState } from "arctic";
+import { googleOAuthClient } from "@/lib/googleOauth";
 
 export const signUp = async (values: z.infer<typeof signUpSchema>) => {
   console.log("In server, values: ", values);
@@ -98,6 +100,34 @@ export const logOut = async () => {
       sessionCookie.attributes
     );
     return redirect("/auth");
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong", success: false };
+  }
+};
+
+export const getGoogleOauthConsentUrl = async () => {
+  try {
+    const state = generateState();
+    const codeVerifier = generateCodeVerifier();
+
+    (await cookies()).set("codeVerifier", codeVerifier, {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+    });
+
+    (await cookies()).set("state", state, {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+    });
+
+    const authUrl = googleOAuthClient.createAuthorizationURL(
+      state,
+      codeVerifier,
+      ["email", "profile"]
+    );
+
+    return { success: true, url: authUrl.toString() };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong", success: false };
